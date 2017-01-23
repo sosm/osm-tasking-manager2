@@ -656,7 +656,7 @@ class Project(Base, Translatable):
 
 
 # the time delta after which the task is unlocked (in seconds)
-EXPIRATION_DELTA = datetime.timedelta(seconds=2 * 60 * 60)
+EXPIRATION_DELTA = datetime.timedelta(seconds=7 * 24 * 60 * 60)
 
 
 @event.listens_for(Project, "after_insert")
