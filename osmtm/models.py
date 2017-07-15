@@ -118,6 +118,8 @@ users_licenses_table = Table(
 # user roles
 ADMIN = 1
 PROJECT_MANAGER = 2
+VALIDATOR = 4
+EXPERIENCED_MAPPER = 8
 
 
 class User(Base):
@@ -126,7 +128,9 @@ class User(Base):
     username = Column(Unicode)
     role_admin = ADMIN
     role_project_manager = PROJECT_MANAGER
-    role = Column(Integer)
+    role_validator = VALIDATOR
+    role_experienced_mapper = EXPERIENCED_MAPPER
+    role = Column(Integer, default=0)
 
     accepted_licenses = relationship("License", secondary=users_licenses_table)
     private_projects = relationship("Project",
@@ -144,18 +148,28 @@ class User(Base):
 
     @hybrid_property
     def is_admin(self):
-        return self.role is self.role_admin
+        return self.role & self.role_admin
 
     @hybrid_property
     def is_project_manager(self):
-        return self.role is self.role_project_manager
+        return self.role & self.role_project_manager
+
+    @hybrid_property
+    def is_validator(self):
+        return self.role & self.role_validator
+
+    @hybrid_property
+    def is_experienced_mapper(self):
+        return self.role & self.role_experienced_mapper
 
     def as_dict(self):
         return {
             "id": self.id,
             "username": self.username,
             "is_admin": self.is_admin,
-            "is_project_manager": self.is_project_manager
+            "is_project_manager": self.is_project_manager,
+            "is_validator": self.is_validator,
+            "is_experienced_mapper": self.is_experienced_mapper,
         }
 
 
@@ -204,6 +218,9 @@ class TaskLock(Base):
     user_id = Column(BigInteger, ForeignKey('users.id'))
     user = relationship(User)
     date = Column(DateTime, default=datetime.datetime.utcnow)
+    # duration of the lock once the task is unlocked
+    # relevant only for records with lock == true
+    duration = 0
 
     __table_args__ = (ForeignKeyConstraint([task_id, project_id],
                                            ['task.id', 'task.project_id']),
@@ -292,6 +309,9 @@ class Task(Base):
 
     parent_id = Column(Integer)
 
+    # Note to developers
+    # If you change this relationship please allow modify `get_task` method
+    # in `project.py`
     cur_lock = relationship(
         TaskLock,
         primaryjoin=lambda: and_(
@@ -307,6 +327,9 @@ class Task(Base):
         uselist=False
     )
 
+    # Note to developers
+    # If you change this relationship please allow modify `get_task` method
+    # in `project.py`
     cur_state = relationship(
         TaskState,
         primaryjoin=lambda: and_(
@@ -473,6 +496,12 @@ project_priority_areas = Table(
 )
 
 
+project_labels_table = Table(
+    'project_labels', Base.metadata,
+    Column('project', Integer, ForeignKey('project.id')),
+    Column('label', Integer, ForeignKey('label.id')))
+
+
 # A project corresponds to a given mapping job to do on a given area
 # Example 1: trace the major roads
 # Example 2: trace the buildings
@@ -528,6 +557,14 @@ class Project(Base, Translatable):
 
     priority_areas = relationship(PriorityArea,
                                   secondary=project_priority_areas)
+
+    # whether the validation should require the validator role or not
+    requires_validator_role = Column(Boolean, default=False)
+
+    labels = relationship("Label", secondary=project_labels_table)
+
+    # whether the validation should require the validator role or not
+    requires_experienced_mapper_role = Column(Boolean, default=False)
 
     def __init__(self, name, user=None):
         self.name = name
@@ -719,6 +756,25 @@ class Message(Base):
         self.from_user = from_
         self.to_user = to
         self.message = message
+
+
+class Label(Base, Translatable):
+    __tablename__ = 'label'
+    id = Column(Integer, primary_key=True)
+    name = Column(Unicode, nullable=False)
+    color = Column(Unicode)
+    projects = relationship("Project", secondary=project_labels_table)
+
+    locale = 'en'
+
+    def __init__(self):
+        pass
+
+
+class LabelTranslation(translation_base(Label)):
+    __tablename__ = 'label_translation'
+
+    description = Column(Unicode, default=u'')
 
 
 class ExtendedJSONEncoder(JSONEncoder):

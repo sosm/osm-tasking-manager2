@@ -33,8 +33,8 @@ To create a virtual Python environment:
 
 ### Database
 
-OSMTM requires a PostgreSQL/PostGIS database. Version 2.x of PostGIS is
-required.
+OSMTM requires a PostgreSQL/PostGIS database. Version 2.3 or higher of PostGIS
+is required.
 
 First create a database user/role named `www-data`:
 
@@ -89,12 +89,12 @@ You need to make the following changes to the osmtm/views/osmauth.py file.
     import httplib2
     httplib2.debuglevel = 4
     PROXY = httplib2.ProxyInfo(httplib2.socks.PROXY_TYPE_HTTP_NO_TUNNEL, 'PROXY-SERVER', PROXY-PORT)
-    
-NOTE: Replace the PROXY-SERVER with your proxy server address and PROXY-PORT with the port number on which your proxy is established. 
-    
-    # then add "proxy_info=PROXY" for every line in oauth.Client. 
+
+NOTE: Replace the PROXY-SERVER with your proxy server address and PROXY-PORT with the port number on which your proxy is established.
+
+    # then add "proxy_info=PROXY" for every line in oauth.Client.
     client = oauth.Client(consumer, proxy_info=PROXY)
-    
+
     client = oauth.Client(consumer, token, proxy_info=PROXY)
 
 Replace the host address in the development.ini file with your IP address of the system.
