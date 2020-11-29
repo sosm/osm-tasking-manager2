@@ -446,7 +446,7 @@ osmtm.project = (function() {
                 data: {
                   title: "Tasking Manager - #" + project_id,
                   type: imagery_url.toLowerCase().substring(0,3),
-                  url: imagery_url
+                  url: imagery_url.substring(4)
                 }
               });
             }
