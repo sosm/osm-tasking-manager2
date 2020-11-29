@@ -4,7 +4,7 @@
   <%
     disabled = ""
     tooltip = ""
-    if (task.zoom - task.project.zoom) > 1:
+    if (task.zoom - task.project.zoom) > 4:
       disabled = "disabled linethrough"
       tooltip = _("You cannot split this task more.")
   %>
