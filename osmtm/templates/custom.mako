@@ -29,7 +29,7 @@
     ${_('Or visit us in our IRC Chat Channel, just select #osm-ch from the pop down channel list: <a href="http://irc.openstreetmap.org/">OSM IRC Channel #osm-ch</a>.')|n}
     </p>
     <p>
-    ${_('This tasking manager is operated by <a href="http://sosm.ch">sosm</a>.')|n}
+    ${_('This tasking manager is operated by <a href="http://sosm.ch">sosm</a>. Contact <a href=mailto:tech@sosm.ch>tech@sosm.ch</a>.')|n}
     </p>
 </%def>
 
